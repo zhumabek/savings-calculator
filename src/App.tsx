@@ -134,11 +134,11 @@ const App = () => {
                                             {calculateMode === CalculateMode.TOTAL ? "Monthly amount" : "Total amount" }
                                         </div>
                                         <div className="info-panel__price">
-                                            ${(calculateMode === CalculateMode.TOTAL ?
-                                                convertToStringCurrency(Number(convertToNumberCurrency(monthlyAmount).toFixed(2)))
+                                            ${calculateMode === CalculateMode.TOTAL ?
+                                                convertToStringCurrency(Number(convertToNumberCurrency(monthlyAmount || "0").toFixed(2)))
                                                 :
-                                                convertToStringCurrency(Number(convertToNumberCurrency(totalAmount).toFixed(2)))
-                                            ) || 0 }
+                                                convertToStringCurrency(Number(convertToNumberCurrency(totalAmount || "0").toFixed(2)))
+                                            }
                                         </div>
                                     </CardBody>
                                     <CardFooter className="info-panel__footer">
