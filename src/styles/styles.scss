@@ -8,7 +8,6 @@
 
 html {
   box-sizing: border-box;
-  //font-size: 62.5%; // 10px/16px = 62.5% -> 1rem = 10px
 }
 
 body {
@@ -20,7 +19,7 @@ body {
 
 .app {
   background-color: #E5E5E5;
-  height: 100vh;
+  min-height: 100vh;
   display: flex;
   justify-content: center;
 }
@@ -37,7 +36,7 @@ body {
     .header-title {
       font-size: 18px;
       line-height: 22px;
-      color: #2F80ED;
+      color: $color-blue;
     }
   }
 
@@ -48,6 +47,11 @@ body {
       background: #FFFEFE;
       box-shadow: 0px 4px 4px rgba(0, 0, 0, 0.1), 0px 0px 20px rgba(0, 0, 0, 0.1);
       border-radius: 6px;
+
+      &__body {
+        padding-top: 45px;
+        padding-bottom: 50px;
+      }
 
       &__title {
         font-size: 30px;
@@ -100,33 +104,13 @@ body {
   }
 
   &__submit-button {
-    background: #2F80ED;
+    background: $color-blue;
     border-radius: 10px;
     font-size: 18px;
     line-height: 22px;
     padding-top: 10px;
     padding-bottom: 10px;
   }
-}
-
-.background-white  {
-  background-color: white !important;
-}
-
-.pointer {
-  cursor: pointer;
-}
-
-.border-left-none {
-  border-left: none;
-}
-
-.border-right-none {
-  border-right: none;
-}
-
-.bold {
-  font-weight: bold;
 }
 
 .info-panel {
@@ -141,7 +125,7 @@ body {
     font-weight: bold;
     font-size: 24px;
     line-height: 29px;
-    color: #2F80ED;
+    color: $color-blue;
   }
 
   &__footer {
