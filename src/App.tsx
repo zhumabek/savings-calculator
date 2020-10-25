@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import './styles/main.scss';
 import {
     Card,
@@ -12,6 +12,9 @@ import {
     InputGroupAddon, InputGroupText, Input, CardFooter,
     Button
 } from "reactstrap"
+import MonthNavigator from "./components/MonthNavigator";
+import moment from "moment";
+import {convertToNumberCurrency, convertToStringCurrency, currMonthName, currYear} from "./utils/helpers";
 
 enum CalculateMode {
     MONTHLY = "MONTHLY",
@@ -19,21 +22,41 @@ enum CalculateMode {
 }
 
 const App = () => {
+   const startDate = moment();
    const [amount, setAmount] = useState('');
    const [totalAmount, setTotalAmount] = useState('');
    const [monthlyAmount, setMonthlyAmount] = useState('');
    const [calculateMode, setCalculateMode] = useState<CalculateMode>(CalculateMode.MONTHLY);
-   const [date, setDate] = useState('');
+   const [date, setDate] = useState<moment.Moment>(moment());
+   const [numOfDepositMonth, setNumOfDepositMonth] = useState(0);
+
+   useEffect(() => {
+      calculate()
+   }, [date, totalAmount, monthlyAmount, calculateMode]);
+
+
+   const calculate = () => {
+       const numOfMonths = Math.round(date.clone().add(1,"minutes").diff(startDate, "months", true));
+       if(calculateMode === CalculateMode.MONTHLY){
+           const calculatedTotalAmount = (numOfMonths) * convertToNumberCurrency(monthlyAmount);
+           setTotalAmount( convertToStringCurrency(calculatedTotalAmount));
+       } else {
+           const calculatedMonthlyAmount = convertToNumberCurrency(totalAmount) / numOfMonths;
+           setMonthlyAmount( convertToStringCurrency(calculatedMonthlyAmount));
+       }
+
+       setNumOfDepositMonth(numOfMonths);
+   };
 
    const handleAmountChange = (event: React.ChangeEvent<HTMLInputElement>) => {
        const { value } = event.target;
-       const numValue = Number(value.replace(/,/g, ''));
+       const numValue = convertToNumberCurrency(value);
        if(!isNaN(numValue)){
-           const newValue = numValue.toLocaleString();
+           const newValue = convertToStringCurrency(numValue);
            setAmount(newValue);
-           calculateMode === CalculateMode.TOTAL ? setTotalAmount(newValue) : setMonthlyAmount(newValue);
+           calculateMode === CalculateMode.MONTHLY ? setMonthlyAmount(newValue) : setTotalAmount(newValue);
        }
-   }
+   };
 
    const handleCalculateModeChange = (event: React.ChangeEvent<HTMLInputElement>) => {
       if(event.target.checked){
@@ -42,14 +65,16 @@ const App = () => {
           return;
       }
 
-      setCalculateMode(CalculateMode.MONTHLY)
+      setCalculateMode(CalculateMode.MONTHLY);
       setMonthlyAmount(amount);
    };
 
-
-
+   const handleMonthChange = (newDate: moment.Moment) => {
+       setDate(newDate);
+   };
 
   return (
+
     <div className="app">
         <div className="page">
             <div className="page__header">
@@ -59,7 +84,7 @@ const App = () => {
             </div>
             <div className="page__body">
                 <Card className="calculator-card">
-                    <CardBody>
+                    <CardBody className="calculator-card__body">
                         <CardTitle className="calculator-card__title">
                             Savings calculator
                         </CardTitle>
@@ -99,19 +124,7 @@ const App = () => {
                                 <Label for="amount" className="form__label--inline">
                                     {calculateMode === CalculateMode.TOTAL ? "Reach goal by" : "Save until" }
                                 </Label>
-                                <InputGroup>
-                                    <InputGroupAddon addonType="prepend" className="form__add-on pointer">
-                                        <InputGroupText>{"<"}</InputGroupText>
-                                    </InputGroupAddon>
-                                    <Input className="form__input border-left-none border-right-none background-white"
-                                           id="amount"
-                                           value={date}
-                                           disabled
-                                    />
-                                    <InputGroupAddon addonType="append" className="form__add-on pointer">
-                                        <InputGroupText>{">"}</InputGroupText>
-                                    </InputGroupAddon>
-                                </InputGroup>
+                                <MonthNavigator value={date} onChange={handleMonthChange}/>
                             </FormGroup>
 
                             <FormGroup>
@@ -121,17 +134,21 @@ const App = () => {
                                             {calculateMode === CalculateMode.TOTAL ? "Monthly amount" : "Total amount" }
                                         </div>
                                         <div className="info-panel__price">
-                                            ${(calculateMode === CalculateMode.TOTAL ? totalAmount : monthlyAmount) || 0 }
+                                            ${(calculateMode === CalculateMode.TOTAL ?
+                                                convertToStringCurrency(Number(convertToNumberCurrency(monthlyAmount).toFixed(2)))
+                                                :
+                                                convertToStringCurrency(Number(convertToNumberCurrency(totalAmount).toFixed(2)))
+                                            ) || 0 }
                                         </div>
                                     </CardBody>
                                     <CardFooter className="info-panel__footer">
                                         { calculateMode === CalculateMode.TOTAL ?
                                             (
-                                                <p>You are planning <span className="bold">{26} monthly</span> deposits to reach your <span className="bold">${totalAmount || 0 }</span> goal by <span className='bold'>{"April 2022."}</span></p>
+                                                <p>You are planning <span className="bold">{numOfDepositMonth} monthly</span> deposits to reach your <span className="bold">${totalAmount || 0 }</span> goal by <span className='bold'>{`${currMonthName(date)} ${currYear(date)}`}.</span></p>
                                             )
                                                 :
                                             (
-                                                <p>You are saving <span className="bold">${monthlyAmount || 0 } monthly</span> to save <span className="bold">${totalAmount || 0 }</span> by <span className="bold">{"April 2022."}</span></p>
+                                                <p>You are saving <span className="bold">${monthlyAmount || 0 } monthly</span> to save <span className="bold">${totalAmount || 0 }</span> by <span className="bold">{`${currMonthName(date)} ${currYear(date)}`}.</span></p>
                                             )
                                         }
                                     </CardFooter>
